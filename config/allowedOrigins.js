@@ -1,3 +1,3 @@
-const allowedOrigins = ['*'];
+const allowedOrigins = [];
 
 module.exports = allowedOrigins;

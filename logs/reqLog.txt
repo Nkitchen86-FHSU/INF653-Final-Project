@@ -137,3 +137,8 @@
 20250422	19:42:11	5bef3a7e-22c7-4d2e-abe6-e947e209862d	GET	undefined	/states/ks/admission
 20250422	19:42:14	00a04d40-b1bb-4f54-b998-5f26dc2d3811	GET	undefined	/states/k/admission
 20250422	19:42:19	5ee95bba-3bf9-463d-b42b-4d28414033d3	GET	undefined	/states/ks/admission
+20250422	20:02:14	1aea1146-4377-4e92-b16a-d5b11ab74d81	GET	undefined	/
+20250422	20:02:14	3405a12d-97f2-493b-b91e-f64505f1dab2	GET	undefined	/css/style.css
+20250422	20:25:48	a25f9d9b-87a5-4109-a019-d369059b00c7	GET	undefined	/
+20250422	20:25:48	20a80666-8e78-4205-9be6-e2f2b8c2e970	GET	undefined	/css/style.css
+20250422	20:25:48	24ec8ed3-6dfa-4ec3-92c4-d651260d2457	GET	undefined	/favicon.ico
