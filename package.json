@@ -4,8 +4,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server",
-    "dev": "nodemon server",
-    "seed": "node seedStates"
+    "dev": "nodemon server"
   },
   "author": "Nicholas Kitchen",
   "license": "ISC",
