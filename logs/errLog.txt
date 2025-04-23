@@ -1,0 +1,7 @@
+20250422	17:37:03	04053ecd-e6fe-4e52-8f2f-e20c46030209	TypeError: console.err is not a function
+20250422	17:37:19	eb896c80-9fea-4016-9090-9733577a94d8	TypeError: console.err is not a function
+20250422	18:24:27	d7449354-e29f-477d-9564-79ffad20750e	ReferenceError: Cannot access 'funfacts' before initialization
+20250422	18:56:19	a51d5e0d-2b58-418a-bbab-21d9b50592cd	TypeError: Cannot read properties of undefined (reading 'toUpperCase')
+20250422	18:56:20	b8a552ab-af2d-4d4d-8815-430244d4640c	TypeError: Cannot read properties of undefined (reading 'toUpperCase')
+20250422	18:58:07	11722cbd-5c79-42f5-8dbe-57652566c7d7	TypeError: Cannot read properties of undefined (reading 'toUpperCase')
+20250422	18:58:23	1c1ddb4a-259b-43b7-b303-292eee282f32	TypeError: Cannot read properties of undefined (reading 'toUpperCase')
