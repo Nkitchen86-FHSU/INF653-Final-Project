@@ -9,6 +9,9 @@
   "author": "Nicholas Kitchen",
   "license": "ISC",
   "description": "",
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "dependencies": {
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
