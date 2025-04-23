@@ -8,7 +8,7 @@ const getAllStates = async (req, res) => {
     if (contig === 'true'){
         try{
             const dbStates = await State.find();
-            let filteredStates = states.filter(state => state.code !== 'AK' || state.code !== 'HI')
+            let filteredStates = states.filter(state => state.code !== 'AK' && state.code !== 'HI')
             filteredStates = filteredStates.map(state => {
                     const match = dbStates.find(s => s.stateCode === state.code)
                     return match ? { ...state, funfacts: match.funfacts} : state;
@@ -51,8 +51,12 @@ const createFunFact = async (req, res) => {
     const stateCode = req.params.state.toUpperCase();
     const { funfacts } = req.body;
 
-    if (!funfacts || !Array.isArray(funfacts)) {
-        return res.status(400).json({ 'message': 'Fun facts are required' });
+    if (!funfacts) {
+        return res.status(400).json({ 'message': 'State fun facts value required' });
+    }
+
+    if(!Array.isArray(funfacts)) {
+        return res.status(400).json({ 'message': 'State fun facts value must be an array' });
     }
 
     try {
@@ -72,25 +76,31 @@ const createFunFact = async (req, res) => {
 }
 
 const patchFunFact = async (req, res) => {
-    if(!req?.body?.index || !req?.body?.funfact) {
-        return res.status(400).json({ 'message': 'Index and fun fact parameter is required'})
+    if(!req?.body?.index) {
+        return res.status(400).json({ 'message': 'State fun fact index value required'})
+    }
+    if(!req?.body?.funfact) {
+        return res.status(400).json({ 'message': 'State fun fact value required'})
     }
     if (!Number.isInteger(req.body.index) || req.body.index < 1) {
         return res.status(400).json({ 'message': 'Invalid integer input for index'})
     }
+    const upperStateCode = req.params.state.toUpperCase();
+    let states = statesJSON;
+    const state = states.find(state => state.code === upperStateCode);
     const stateCode = req.params.state.toUpperCase();
     const index = req.body.index - 1;
 
     try{
-        const state = await State.findOne({ stateCode: stateCode })
-        if (!state) {
-            return res.status(204).json({ "message": ` No state matches statecode ${stateCode}.` });
+        const stateDB = await State.findOne({ stateCode: stateCode })
+        if (!stateDB?.funfacts || stateDB.funfacts.length === 0) {
+            return res.status(400).json({ "message": `No Fun Facts found for ${state.state}` });
         }
-        if (!state.funfacts[index]) {
-            return res.status(204).json({ "message": ` The state has no fun facts at index ${req.body.index}.` });
+        if (index < 0 || index >= stateDB.funfacts.length) {
+            return res.status(400).json({ "message": `No Fun Fact found at that index for ${state.state}` });
         }
-        state.funfacts[index] = req.body.funfact;
-        const result = await state.save();
+        stateDB.funfacts[index] = req.body.funfact;
+        const result = await stateDB.save();
         res.status(201).json(result);
     } catch (err) {
         console.error(err);
@@ -99,24 +109,27 @@ const patchFunFact = async (req, res) => {
 
 const deleteFunFact = async (req, res) => {
     if(!req?.body?.index) {
-        return res.status(400).json({ 'message': 'Index parameter is required'})
+        return res.status(400).json({ 'message': 'State fun fact index value required'})
     }
     if (!Number.isInteger(req.body.index) || req.body.index < 1) {
         return res.status(400).json({ 'message': 'Invalid integer input for index'})
     }
+    const upperStateCode = req.params.state.toUpperCase();
+    let states = statesJSON;
+    const state = states.find(state => state.code === upperStateCode);
     const stateCode = req.params.state.toUpperCase();
     const index = req.body.index - 1;
 
     try{
-        const state = await State.findOne({ stateCode: stateCode })
-        if (!state) {
-            return res.status(204).json({ "message": ` No state matches statecode ${stateCode}.` });
+        const stateDB = await State.findOne({ stateCode: stateCode })
+        if (!stateDB?.funfacts || stateDB.funfacts.length === 0) {
+            return res.status(400).json({ "message": `No Fun Facts found for ${state.state}` });
         }
-        if (!state.funfacts[index]) {
-            return res.status(204).json({ "message": ` The state has no fun facts at index ${req.body.index}.` });
+        if (index < 0 || index >= stateDB.funfacts.length) {
+            return res.status(400).json({ "message": `No Fun Fact found at that index for ${state.state}` });
         }
-        state.funfacts.splice(index, 1);
-        const result = await state.save();
+        stateDB.funfacts.splice(index, 1);
+        const result = await stateDB.save();
         res.status(201).json(result);
     } catch (err) {
         console.error(err);
@@ -125,9 +138,12 @@ const deleteFunFact = async (req, res) => {
 
 const getState = async (req, res) => {
     if (!req?.params?.state) return res.status(400).json({ 'message': 'State code required.' });
-    upperStateCode = req.params.state.toUpperCase()
+    const upperStateCode = req.params.state.toUpperCase();
     let states = statesJSON;
-
+    const state = states.find(state => state.code === upperStateCode);
+    if (!state) {
+        return res.status(400).json({ 'message': 'Invalid state abbreviation parameter' });
+    }
     try{
         const dbStates = await State.find();
         let filteredState = states.filter(state => state.code === upperStateCode);
@@ -135,20 +151,25 @@ const getState = async (req, res) => {
                 const match = dbStates.find(s => s.stateCode === state.code)
                 return match ? { ...state, funfacts: match.funfacts} : state;
         });
-        if (!filteredState) return res.status(204).json({ 'message': 'No states found.' });
-        res.json(filteredState);
+        if (filteredState.length === 0) return res.status(204).json({ 'message': 'No states found.' });
+        res.json(filteredState[0]);
     } catch (err) {
         console.error(err);
     }
 }
 
 const getStateFunFact = async (req, res) => {
-    if (!req?.params?.state) return res.status(400).json({ 'message': 'State code required.' });
+    if (!req?.params?.state) return res.status(400).json({ 'message': 'Invalid state abbreviation parameter' });
     const upperStateCode = req.params.state.toUpperCase();
+    const states = statesJSON;
+    const state = states.find(state => state.code === upperStateCode);
+    if (!state) {
+        return res.status(400).json({ 'message': 'Invalid state abbreviation parameter' });
+    }
     try{
         const dbState = await State.findOne({ stateCode: upperStateCode });
         if (!dbState || !dbState.funfacts || dbState.funfacts.length === 0) {
-            return res.status(404).json({ message: `No fun facts found for ${upperStateCode}` });
+            return res.status(404).json({ message: `No Fun Facts found for ${state.state}` });
         }
         const index = Math.floor(Math.random() * (dbState.funfacts.length));
         const randomFunFact = dbState.funfacts[index];
@@ -164,6 +185,9 @@ const getStateCapital = async (req,res) => {
     const upperStateCode = req.params.state.toUpperCase();
     const states = statesJSON;
     const state = states.find(state => state.code === upperStateCode);
+    if (!state) {
+        return res.status(400).json({ 'message': 'Invalid state abbreviation parameter' });
+    }
     if (!state || !state.capital_city) {
         return res.status(404).json({ message: `No capital found for ${upperStateCode}` });
     }
@@ -176,6 +200,9 @@ const getStateNickname = async (req,res) => {
     const upperStateCode = req.params.state.toUpperCase();
     const states = statesJSON;
     const state = states.find(state => state.code === upperStateCode);
+    if (!state) {
+        return res.status(400).json({ 'message': 'Invalid state abbreviation parameter' });
+    }
     if (!state || !state.nickname) {
         return res.status(404).json({ message: `No nickname found for ${upperStateCode}` });
     }
@@ -188,11 +215,14 @@ const getStatePopulation = async (req,res) => {
     const upperStateCode = req.params.state.toUpperCase();
     const states = statesJSON;
     const state = states.find(state => state.code === upperStateCode);
-    if (!state || !state.population) {
+    if (!state) {
+        return res.status(400).json({ 'message': 'Invalid state abbreviation parameter' });
+    }
+    if (!state.population) {
         return res.status(404).json({ message: `No population found for ${upperStateCode}` });
     }
 
-    res.json({ state: state.state, population: state.population }); 
+    res.json({ state: state.state, population: state.population.toLocaleString('en-US') }); 
 }
 
 const getStateAdmission = async (req,res) => {
@@ -200,11 +230,14 @@ const getStateAdmission = async (req,res) => {
     const upperStateCode = req.params.state.toUpperCase();
     const states = statesJSON;
     const state = states.find(state => state.code === upperStateCode);
-    if (!state || !state.admission_date) {
+    if (!state) {
+        return res.status(400).json({ 'message': 'Invalid state abbreviation parameter' });
+    }
+    if (!state.admission_date) {
         return res.status(404).json({ message: `No admission date found for ${upperStateCode}` });
     }
 
-    res.json({ state: state.state, admission_date: state.admission_date }); 
+    res.json({ state: state.state, admitted: state.admission_date }); 
 }
 
 module.exports = {
